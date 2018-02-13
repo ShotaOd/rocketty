@@ -1,0 +1,39 @@
+{
+  "name": "rocketty",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@types/matter-js": "^0.9.33",
+    "@types/react": "^16.0.34",
+    "@types/react-native": "^0.52.1",
+    "jest-expo": "23.0.0",
+    "react-native-scripts": "1.9.0",
+    "react-test-renderer": "16.0.0",
+    "typescript": "^2.6.2"
+  },
+  "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
+  "scripts": {
+    "start": "react-native-scripts start --skipflow",
+    "eject": "react-native-scripts eject",
+    "android": "react-native-scripts android --skipflow",
+    "ios": "react-native-scripts ios --skipflow",
+    "test": "node ./node_modules/jest/bin/jest.js --watch",
+    "build": "node ./node_modules/.bin/tsc",
+    "build:watch": "node ./node_modules/.bin/tsc --watch"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "@types/prop-types": "^15.5.2",
+    "expo": "^23.0.4",
+    "matter-attractors": "^0.1.6",
+    "matter-js": "^0.14.1",
+    "mobx-react": "^4.3.5",
+    "prop-types": "^15.6.0",
+    "react": "16.0.0",
+    "react-game-kit": "^1.0.6",
+    "react-native": "0.50.3",
+    "react-native-linear-gradient": "^2.4.0"
+  }
+}
