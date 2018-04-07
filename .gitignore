@@ -2,6 +2,9 @@
 .expo/
 .expo-source/
 
+# react native
+build/
+
 # dependencies
 /node_modules
 
@@ -58,6 +61,9 @@ typings/
 # Gradle:
 .idea/**/gradle.xml
 .idea/**/libraries
+
+# Pods
+Pods/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
