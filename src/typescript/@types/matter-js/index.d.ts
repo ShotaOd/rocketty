@@ -2,8 +2,8 @@
 // noinspection ES6UnusedImports
 import * as Matter from 'matter-js'
 
-declare module 'matter-js' {
-  function use(...names: string[]): void;
+declare module "matter-js" {
+  export function use(...names: string[]): void;
 
   export interface IBodyDefinition {
     plugin?: {};
