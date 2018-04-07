@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Scenery, SceneryProp} from "../Scenery";
 import * as Matter from 'matter-js';
-import {Configuration} from "../../../Configuration";
+import {Configuration} from "../../../../Configuration";
 import Line from "../../Line";
 import {Size} from "../../../support/Coordination";
 

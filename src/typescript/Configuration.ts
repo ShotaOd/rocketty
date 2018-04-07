@@ -1,6 +1,6 @@
-import {ObstacleType} from "./sprite/obstacle/Obstacle";
+import {ObstacleType} from "./game/sprite/obstacle/Obstacle";
+import {SceneryType} from "./game/sprite/scenery/Scenery";
 import {Dimensions} from "react-native";
-import {SceneryType} from "./sprite/scenery/Scenery";
 
 export const Configuration = {
   // game performance
@@ -19,7 +19,7 @@ export const Configuration = {
       back: 0,
       main: 100,
     },
-    noGame: {
+    ui: {
       base: 1000,
     },
     all: 9999,

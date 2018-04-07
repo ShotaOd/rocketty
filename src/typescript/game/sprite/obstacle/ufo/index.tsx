@@ -2,8 +2,7 @@ import * as React from 'react';
 import {Image, View, ViewStyle} from 'react-native';
 import {Obstacle, ObstacleProp} from "../Obstacle";
 import * as Matter from 'matter-js';
-import {getOAbsC} from "../../../support/Coordination";
-import {Configuration} from "../../../Configuration";
+import {Configuration} from "../../../../Configuration";
 
 const radius = 30;
 

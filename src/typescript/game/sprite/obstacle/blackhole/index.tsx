@@ -4,7 +4,7 @@ import {Component} from 'react';
 import {View, ViewStyle} from 'react-native';
 import * as Matter from 'matter-js';
 import {Vector} from 'matter-js';
-//
+// support
 import {CollisionCategory} from "../../../support/Collision";
 
 const maxRadius = 100;
@@ -31,7 +31,7 @@ export default class BlackHole extends Component<BlackHoleProp> {
     }
     return {
       x: (a.position.x - b.position.x) * 3e-6,
-      y: (a.position.y - b.position.y) * 5e-7,
+      y: (a.position.y - b.position.y) * 5e-8,
     };
   }
 

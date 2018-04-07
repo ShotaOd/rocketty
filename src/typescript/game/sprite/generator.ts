@@ -1,11 +1,11 @@
 // library
 import * as Matter from "matter-js";
 // conf / support
-import {Configuration} from "../Configuration";
+import {Configuration} from "../../Configuration";
 import {oAbsC, Rectangle} from "../support/Coordination";
 import {randBool} from "../support/Random";
 // game
-import {ObstacleSeed, ScenerySeed} from "../Game";
+import {ObstacleSeed, ScenerySeed} from "../index";
 // sprites
 import {SpriteLabel} from "./SpriteLabel";
 import {SceneryType} from "./scenery/Scenery";

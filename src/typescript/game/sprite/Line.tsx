@@ -31,7 +31,6 @@ export default class Line extends Component<Prop> {
    * @return {ViewStyle}
    */
   private getStyle(): ViewStyle {
-    const start = Date.now();
     const {
       from,
       to,

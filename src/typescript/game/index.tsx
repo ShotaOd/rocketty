@@ -6,12 +6,12 @@ import * as PropTypes from 'prop-types';
 import * as Matter from 'matter-js';
 import {IPair} from 'matter-js';
 // supports
-import {Configuration} from "./Configuration";
+import {Configuration} from "../Configuration";
 import {aVec, getOAbsC, oAbsC, rVecX, rVecY, Vector} from "./support/Coordination";
 import {Side} from "./define/Side";
 // uis
 import CircleButton from "./support/CircleButton";
-import WaitBoard from "./board";
+import WaitBoard from "../ui/board/index";
 // sprites
 import RectangleBody from './sprite/RectangleBody';
 import {ObstacleProp, ObstacleType} from "./sprite/obstacle/Obstacle";
@@ -31,7 +31,11 @@ import Meteor from "./sprite/obstacle/meteor";
 import {generateRandomObstacle, generateRandomScenery} from "./sprite/generator";
 import {SpriteLabel} from "./sprite/SpriteLabel";
 
-type Prop = {};
+type Prop = {
+  refStart: (ref: () => void) => void;
+  onReady: () => void,
+  onOver: (score: number) => void;
+};
 
 type ObstacleState = {
   id: number,
@@ -79,10 +83,6 @@ type State = {
   },
   obstacles: ObstacleState[],
   sceneries: SceneryState[],
-  waitBoard: {
-    show: boolean,
-    score?: number,
-  }
 }
 
 const getGameVisibleStyle = (): ViewStyle => {
@@ -114,9 +114,6 @@ const getInitialState = (oAbsC: oAbsC): State => {
     },
     obstacles: [],
     sceneries: [],
-    waitBoard: {
-      show: false,
-    },
   }
 };
 
@@ -147,10 +144,10 @@ enum GameEvent {
 
 class GameState {
   private cb: {
-    Ry: (() => void)[];
-    Py: (() => void)[];
-    Or: (() => void)[];
-    Rt: (() => void)[];
+    Ry: ((payload?: any) => void)[];
+    Py: ((payload?: any) => void)[];
+    Or: ((payload?: any) => void)[];
+    Rt: ((payload?: any) => void)[];
   };
   private _event: GameEvent;
 
@@ -167,13 +164,13 @@ class GameState {
     this.cb[e].push(cb);
   }
 
-  off(e: GameEvent, cb: () => void) {
+  off(e: GameEvent, cb: (payload?: any) => void) {
     this.cb[e] = this.cb[e].filter(c => c !== cb);
   }
 
-  change(e: GameEvent) {
+  change(e: GameEvent, payload?: any) {
     this._event = e;
-    this.cb[e].forEach(cb => cb());
+    this.cb[e].forEach(cb => cb(payload));
   }
 
   get event(): GameEvent {
@@ -236,10 +233,6 @@ export default class Game extends Component<Prop, State> {
     };
   };
 
-  context: {
-    scale: number,
-  };
-
   constructor(props: Prop) {
     super(props);
     // field
@@ -277,15 +270,12 @@ export default class Game extends Component<Prop, State> {
     Matter.Events.on(this.engine, 'collisionStart', this.handleCollision);
 
     // Game Events
-    this.gameState.on(GameEvent.Over, () => {
-      const {waitBoard} = this.state;
-      waitBoard.show = true;
-      this.setState({waitBoard});
+    this.gameState.on(GameEvent.Over, (payload?: number) => {
+      const score = payload || 0;
+      this.props.onOver(score);
     });
     this.gameState.on(GameEvent.Ready, () => {
       this.loop.stop();
-      // reset score
-      this.startTm = Date.now();
 
       // clean view
       this.obstacles.forEach(obstacle => {
@@ -305,17 +295,31 @@ export default class Game extends Component<Prop, State> {
       const initialState = getInitialState(this.oAbsC);
       this.setState(initialState);
 
+      // warm score
+      this.frozenScore = NaN;
+      this.freezeScore = false;
+
       // setup rocket
       this.rocket.force = {x: 0, y: 0};
       Matter.Body.setPosition(this.rocket, initialState.rocket.center);
       Matter.Body.setVelocity(this.rocket, {x: 0, y: 0});
       Matter.Body.setAngle(this.rocket, -1);
+
+      // call prop onReady
+      this.props.onReady();
     });
     this.gameState.on(GameEvent.Play, () => {
+      // reset score
+      this.startTm = Date.now();
       this.loop.start();
     });
 
     this.gameState.change(GameEvent.Ready);
+  }
+
+  componentWillReceiveProps(nextProps: Readonly<Prop>, nextContext: any): void {
+    const gameStarter = () => this.gameState.change(GameEvent.Ready);
+    this.props.refStart(gameStarter);
   }
 
   componentWillUnmount(): void {
@@ -504,10 +508,7 @@ export default class Game extends Component<Prop, State> {
       const labelA = bodyA.label;
       const labelB = bodyB.label;
       if (collisionReset && (labelA === SpriteLabel.Rocket || labelB === SpriteLabel.Rocket)) {
-        const waitBoard = this.state.waitBoard;
-        waitBoard.score = this.getScore();
-        this.setState({waitBoard});
-        this.gameState.change(GameEvent.Over);
+        this.gameState.change(GameEvent.Over, this.getScore(true));
       }
 
       const checkRes = checkLabel(labelA, labelB, SpriteLabel.Obstacle, SpriteLabel.Wall, SpriteLabel.BlackHole);
@@ -634,22 +635,22 @@ export default class Game extends Component<Prop, State> {
     );
   }
 
-  private getScore() {
-    if (this.gameState.event === GameEvent.Over) {
-      return this.state.waitBoard.score;
+  private freezeScore: boolean;
+  private frozenScore: number;
+  private getScore(freeze: boolean = false) {
+    if (this.freezeScore) {
+      return this.frozenScore;
     }
-    return this.state.additionalScore
+    this.freezeScore = freeze;
+    const score = this.state.additionalScore
       + (this.startTm
         ? Math.round((Date.now() - this.startTm) / 1000)
         : 0);
-  }
+    if (freeze) {
+      this.frozenScore = score;
+    }
 
-  private renderWaitBoard(): ReactNode | undefined {
-    if (!this.state.waitBoard.show) return;
-    return (<WaitBoard
-      onTapResume={() => this.gameState.change(GameEvent.Ready)}
-      score={this.state.waitBoard.score}
-    />);
+    return score;
   }
 
   private renderReadyHandler() {
@@ -661,7 +662,7 @@ export default class Game extends Component<Prop, State> {
       left: 0,
       width: dim.width,
       height: dim.height,
-      zIndex: Configuration.layer.noGame.base,
+      zIndex: Configuration.layer.ui.base,
     };
     return (<TouchableWithoutFeedback onPress={(): void => {
       this.gameState.change(GameEvent.Play)
@@ -756,8 +757,6 @@ export default class Game extends Component<Prop, State> {
         <View style={getGameVisibleStyle()}/>
         {/*Score*/}
         {this.renderScore()}
-        {/*Board*/}
-        {this.renderWaitBoard()}
         {/*ReadyHandler*/}
         {this.renderReadyHandler()}
         {/*Walls*/}
