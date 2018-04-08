@@ -1,13 +1,12 @@
 import * as React from 'react'
 import {Component} from 'react'
-import {Text, View} from 'react-native';
+import {View} from 'react-native';
 import Styles from "./Styles";
 import Top from "./Top";
 import RankingBoard from "./RankingBoard";
 import {InitializeState} from "../../App";
 import {UserHighScore} from "../../common/Types";
 import ConfigBoard from "./ConfigBoard";
-import RockettyUserDataManager from "../../data/RockettyUserDataManager";
 
 interface Props {
   score?: number,
