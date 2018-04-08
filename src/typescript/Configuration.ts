@@ -12,7 +12,6 @@ export const Configuration = {
   visibleGameStyle: {
     borderWidth: 1,
     borderColor: 'gray',
-    backgroundColor: '#273452',
   },
   layer: {
     game: {
