@@ -4,6 +4,7 @@ import {Image, View, ViewStyle} from 'react-native';
 import IntrinsicBodyRef from "../IntrinsicBodyRef";
 import * as Matter from 'matter-js';
 import {ICollisionFilter} from 'matter-js';
+import RocketImgSrc from './rocket.png';
 
 export interface RocketProp extends IntrinsicBodyRef {
   label: string,
@@ -59,7 +60,7 @@ export default class Rocket extends Component<RocketProp> {
         style={this.getRocketStyle()}
       >
         <Image
-          source={require('./rocket.png')}
+          source={RocketImgSrc}
         />
       </View>
     );
