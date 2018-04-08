@@ -1,4 +1,6 @@
 {
+  "name": "rocketty",
+  "displayName": "ROCKETTY",
   "expo": {
     "sdkVersion": "23.0.0",
     "ios": {
