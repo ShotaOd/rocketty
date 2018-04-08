@@ -1,2 +1,6 @@
+import {AppRegistry} from 'react-native';
 import App from './lib/App';
-export default App;
+import {patch} from './src/javascript/misc/patch';
+
+patch();
+AppRegistry.registerComponent('rocketty', () => App);
