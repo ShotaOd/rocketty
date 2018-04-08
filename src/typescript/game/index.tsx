@@ -1,7 +1,8 @@
 // libraries
 import * as React from 'react';
 import {Component, ReactNode} from 'react';
-import {Dimensions, Text, TouchableWithoutFeedback, View, ViewStyle} from 'react-native';
+import {Dimensions, Text, TouchableWithoutFeedback, View} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import * as PropTypes from 'prop-types';
 import * as Matter from 'matter-js';
 import {IPair} from 'matter-js';
@@ -11,7 +12,6 @@ import {aVec, getOAbsC, oAbsC, rVecX, rVecY, Vector} from "./support/Coordinatio
 import {Side} from "./define/Side";
 // uis
 import CircleButton from "./support/CircleButton";
-import WaitBoard from "../ui/board/index";
 // sprites
 import RectangleBody from './sprite/RectangleBody';
 import {ObstacleProp, ObstacleType} from "./sprite/obstacle/Obstacle";
@@ -83,17 +83,53 @@ type State = {
   },
   obstacles: ObstacleState[],
   sceneries: SceneryState[],
+  timestamp: number,
 }
 
-const getGameVisibleStyle = (): ViewStyle => {
-  const {gameRect: {size, origin}} = Configuration;
-  return Object.assign({
-    position: 'absolute',
-    left: origin.x,
-    top: origin.y,
-    width: size.width,
-    height: size.height,
-  }, Configuration.visibleGameStyle);
+const {gameRect: {size, origin}} = Configuration;
+const gameVisibleStyle = Object.assign({
+  position: 'absolute',
+  left: origin.x,
+  top: origin.y,
+  width: size.width,
+  height: size.height,
+}, Configuration.visibleGameStyle);
+
+const blue0 = '#043152'; // 4 49 82
+const blue1 = '#0e3b5c'; // 14 59 92
+const blue2 = '#184566'; // 24 69 102
+const blue3 = '#224f70'; // 34 79 112
+const blue4 = '#2c597a'; // 44 89 122
+const blue5 = '#366384';  // 54 99 132
+const baseColors = [blue0, blue1, blue2, blue4, blue5];
+const complementColors = (() => {
+  const tmp = baseColors.slice();
+  const popToUnshift = () => {
+    const pop = tmp.pop();
+    pop && tmp.unshift(pop);
+  };
+  popToUnshift();
+  popToUnshift();
+  return tmp;
+})();
+console.log(complementColors);
+let colors = baseColors.slice();
+const throttle = 10000;
+const getGradient = (seed: number): { colors: string[], locations: number[] } => {
+  const throttleSeed = seed % throttle;
+  if (throttleSeed === 0) {
+    const color = colors.pop();
+    if (color) {
+      const complementColor = complementColors[baseColors.indexOf(color)];
+      colors.unshift(complementColor);
+    }
+  }
+  const move = Math.pow(throttleSeed, 2) / Math.pow(throttle, 2);
+  const third = (1 + move) / 2;
+  return {
+    colors,
+    locations: [0, move / 2, move, third > 0.99 ? 1 : third, 1]
+  }
 };
 
 const getInitialRocket = (oAbsC: oAbsC) => {
@@ -114,6 +150,7 @@ const getInitialState = (oAbsC: oAbsC): State => {
     },
     obstacles: [],
     sceneries: [],
+    timestamp: 0,
   }
 };
 
@@ -139,7 +176,6 @@ enum GameEvent {
   Ready = 'Ry',
   Play = 'Py',
   Over = 'Or',
-  Result = 'Rt',
 }
 
 class GameState {
@@ -445,7 +481,7 @@ export default class Game extends Component<Prop, State> {
     });
   }
 
-  private handleAfterUpdate() {
+  private handleAfterUpdate(e: any) {
     let escapeScore = 0;
     const {position, angle} = this.rocket;
     const obstacles: ObstacleState[] = this.obstacles
@@ -496,6 +532,7 @@ export default class Game extends Component<Prop, State> {
       },
       obstacles,
       sceneries,
+      timestamp: e.timestamp as number,
     });
   }
 
@@ -637,6 +674,7 @@ export default class Game extends Component<Prop, State> {
 
   private freezeScore: boolean;
   private frozenScore: number;
+
   private getScore(freeze: boolean = false) {
     if (this.freezeScore) {
       return this.frozenScore;
@@ -751,10 +789,15 @@ export default class Game extends Component<Prop, State> {
   }
 
   render(): ReactNode {
+    const gradientProps = getGradient(this.state.timestamp);
     return (
       <View>
         {/*Background*/}
-        <View style={getGameVisibleStyle()}/>
+        <LinearGradient
+          {...gradientProps}
+          style={gameVisibleStyle}
+        >
+        </LinearGradient>
         {/*Score*/}
         {this.renderScore()}
         {/*ReadyHandler*/}
@@ -774,6 +817,7 @@ export default class Game extends Component<Prop, State> {
         <Rocket {...this.getRocketProp()} />
         {/*UI*/}
         {this.renderBoostButtons()}
+
       </View>
     );
   }
